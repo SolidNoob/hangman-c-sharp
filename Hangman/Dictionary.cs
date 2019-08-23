@@ -6,7 +6,21 @@ namespace Hangman
     {
         public string getRandomWord(int length = 7)
         {
-            string[] words = { "programming", "coding", "function", "method", "brackets" };
+            string[] words = {
+                "programming",
+                "coding",
+                "function",
+                "method",
+                "brackets",
+                "php",
+                "csharp",
+                "python",
+                "laravel",
+                "javascript",
+                "class",
+                "framework",
+                "collection",
+            };
             int randomIndex = getRandomNumber(0, (words.Length - 1));
 
             return words[randomIndex];

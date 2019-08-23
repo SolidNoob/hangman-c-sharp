@@ -2,8 +2,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hangman
 {
@@ -16,36 +14,47 @@ namespace Hangman
 
         static void Main(string[] args)
         {
+            string wordToGessStatus = "";
             char guessedLetter;
-            string wordStatus = "";
             bool running = true;
 
             // initialize game variables
             initGame();
-            Console.WriteLine(randomWord);
+            // Console.WriteLine(randomWord);
 
             while (running)
             {
+                wordToGessStatus = getWordStatus();
+                Console.WriteLine("Guess that word: {0}", wordToGessStatus);
+                
+                // victory
+                if ( ! wordToGessStatus.Contains('*'))
+                {
+                    Console.WriteLine("Yay! You win with {0} tries remaining !", triesLeft);
+                    running = false;
+                    break;
+                }
+
                 // ask user input (letter)
                 Console.WriteLine("Number of tries left: {0}", triesLeft);
-                Console.WriteLine("Try to guess a letter: ");
-                guessedLetter = Console.ReadLine()[0];
+                Console.WriteLine("Please enter a letter: ");
+
+                guessedLetter = readLetterFromUser();
+
                 lettersHistory.Add(guessedLetter);
 
                 // check if the word contains the letter
                 if ( ! randomWord.Contains(guessedLetter))
                 {
-                    // remove one try if letter is not contained in the random word
                     triesLeft = triesLeft - 1;
-                }
-                else
-                {
-                    wordStatus = getWordStatus();
-                    Console.WriteLine("Word to find: {0}", wordStatus);
-                }
 
-
-                //running = false;
+                    // loss
+                    if (triesLeft == 0)
+                    {
+                        Console.WriteLine("No tries left - GAME OVER");
+                        running = false;
+                    }
+                }
             }
         }
 
@@ -78,6 +87,23 @@ namespace Hangman
                 wordStatus += tmpLetter;
             }
             return wordStatus;
+        }
+
+        private static char readLetterFromUser()
+        {
+            char guessedLetter;
+
+            do
+            {
+                string userInput = Console.ReadLine();
+                if (!String.IsNullOrEmpty(userInput))
+                    guessedLetter = userInput[0];
+                else
+                    guessedLetter = '\0';
+
+            } while (!Char.IsLetter(guessedLetter));
+
+            return guessedLetter;
         }
     }
 }
