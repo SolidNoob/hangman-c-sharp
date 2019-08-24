@@ -7,86 +7,53 @@ namespace Hangman
 {
     class Program
     {
-        private const int maximumTries = 10;
-        private static int triesLeft;
-        private static string randomWord;
-        private static List<char> lettersHistory;
-
         static void Main(string[] args)
         {
-            string wordToGessStatus = "";
-            char guessedLetter;
             bool running = true;
 
-            // initialize game variables
-            initGame();
-            // Console.WriteLine(randomWord);
+            List<char> userCharsHistory = new List<char>();
+            int numberOfErrors = 0, discoveredLetters = 0, lettersToDiscover = 0;
+            char userLetter;
+
+            Dictionary dictionary = new Dictionary();
+            string randomWord = dictionary.getRandomWord();
+            lettersToDiscover = randomWord.Distinct().Count();
+
+            GamePresentation presentationHandler = new GamePresentation();
 
             while (running)
             {
-                wordToGessStatus = getWordStatus();
-                Console.WriteLine("Guess that word: {0}", wordToGessStatus);
-                
-                // victory
-                if ( ! wordToGessStatus.Contains('*'))
+                presentationHandler.printHeader();
+                presentationHandler.printHangman(numberOfErrors);
+                presentationHandler.printAlphabet(userCharsHistory);
+                presentationHandler.printWordStatus(randomWord, userCharsHistory);
+                presentationHandler.printPlayerPrompt();
+
+                userLetter = readLetterFromUser();
+                if ( ! randomWord.ToUpper().Contains(userLetter))
+                    numberOfErrors++;
+                else
                 {
-                    Console.WriteLine("Yay! You win with {0} tries remaining !", triesLeft);
+                    if ( ! userCharsHistory.Contains(userLetter))
+                        discoveredLetters++;
+                }
+                userCharsHistory.Add(userLetter);
+
+                if (discoveredLetters == lettersToDiscover)
+                {
+                    Console.WriteLine("Victory! You found the word \"{0}\"", randomWord);
                     running = false;
-                    break;
                 }
-
-                // ask user input (letter)
-                Console.WriteLine("Number of tries left: {0}", triesLeft);
-                Console.WriteLine("Please enter a letter: ");
-
-                guessedLetter = readLetterFromUser();
-
-                lettersHistory.Add(guessedLetter);
-
-                // check if the word contains the letter
-                if ( ! randomWord.Contains(guessedLetter))
+                else if(numberOfErrors == 7)
                 {
-                    triesLeft = triesLeft - 1;
-
-                    // loss
-                    if (triesLeft == 0)
-                    {
-                        Console.WriteLine("No tries left - GAME OVER");
-                        running = false;
-                    }
+                    Console.WriteLine("Game over! The word was \"{0}\"", randomWord);
+                    running = false;
                 }
+                else
+                    Console.Clear();
+
             }
-        }
-
-        private static void initGame()
-        {
-            triesLeft = maximumTries;
-
-            lettersHistory = new List<char>();
-
-            // get a random word from dictionnary
-            Dictionary dictionary = new Dictionary();
-            randomWord = dictionary.getRandomWord();
-        }
-
-        private static string getWordStatus()
-        {
-            string wordStatus = "";
-
-            foreach (char character in randomWord)
-            {
-                char tmpLetter = '*'; 
-                foreach (char letter in lettersHistory)
-                {
-                    if (character == letter)
-                    {
-                        tmpLetter = letter;
-                        break;
-                    }
-                }
-                wordStatus += tmpLetter;
-            }
-            return wordStatus;
+            return;
         }
 
         private static char readLetterFromUser()
@@ -96,15 +63,16 @@ namespace Hangman
             do
             {
                 string userInput = Console.ReadLine();
-                if (!String.IsNullOrEmpty(userInput))
+                if ( ! String.IsNullOrEmpty(userInput))
                     guessedLetter = userInput[0];
                 else
                     guessedLetter = '\0';
 
-            } while (!Char.IsLetter(guessedLetter));
+            } while ( ! Char.IsLetter(guessedLetter));
 
-            return guessedLetter;
+            return Char.ToUpper(guessedLetter);
         }
+
     }
 }
 
